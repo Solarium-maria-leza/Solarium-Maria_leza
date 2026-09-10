@@ -67,7 +67,7 @@
   var scanner = null;
   var clientes = {};          // caché local: id -> {nombre, bono, usadas}
   var ultimaPasada = {};      // id -> timestamp (anti doble pasada local)
-  var SEGUNDOS_ANTIDOBLE = 600;   // 10 min: la misma persona no descuenta dos veces
+  var SEGUNDOS_ANTIDOBLE = 30;
 
   function beep(bueno) {
     try {
@@ -133,7 +133,10 @@
     if (window.google && google.script && google.script.run) {
       google.script.run.withSuccessHandler(done).withFailureHandler(fallo).registrar(id);
     } else if (API_URL) {
-      fetch(API_URL + '?id=' + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(done).catch(fallo);
+      // 'n' es un identificador unico de esta lectura: si la red repite la peticion, el servidor no la cuenta dos veces
+      var nonce = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      fetch(API_URL + '?id=' + encodeURIComponent(id) + '&n=' + nonce, { cache: 'no-store' })
+        .then(function (r) { return r.json(); }).then(done).catch(fallo);
     } else {
       pintar({ ok: false, msg: 'Falta configurar API_URL' }, true);
     }
