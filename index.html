@@ -54,7 +54,7 @@
   <div class="grande" id="mGrande"></div>
   <div class="pie" id="mPie"></div>
 </div>
-<div id="estado"></div>
+<div id="estado">Cargando clientes...</div>
 
 <script>
   // ---- Configuración ----
@@ -67,7 +67,7 @@
   var scanner = null;
   var clientes = {};          // caché local: id -> {nombre, bono, usadas}
   var ultimaPasada = {};      // id -> timestamp (anti doble pasada local)
-  var SEGUNDOS_ANTIDOBLE = 30;
+  var SEGUNDOS_ANTIDOBLE = 600;   // 10 min: la misma persona no descuenta dos veces
 
   function beep(bueno) {
     try {
@@ -90,7 +90,7 @@
         clientes = m;
         document.getElementById('estado').textContent = 'Listo · ' + arr.length + ' clientes';
       })
-      .catch(function () {});
+      .catch(function () { document.getElementById('estado').textContent = 'Sin conexion con la hoja. Reintentando...'; });
   }
 
   function pintar(res, temporizador) {
@@ -120,9 +120,11 @@
   function llamar(id, enSegundoPlano) {
     var done = function (res) {
       if (enSegundoPlano) {
-        // Ya mostramos el resultado local; solo corregimos si el servidor dice que NO
-        if (!res.ok) { pintar(res, false); }
-        if (clientes[id]) { clientes[id].usadas = (clientes[id].bono || 0) - (res.restantes || 0); }
+        // Ya mostramos el resultado local; corregimos si el servidor dice otra cosa
+        if (!res.ok || res.repetido) { pintar(res, false); }
+        if (clientes[id] && typeof res.restantes === 'number') {
+          clientes[id].usadas = (clientes[id].bono || 0) - res.restantes;
+        }
       } else {
         pintar(res, true);
       }
