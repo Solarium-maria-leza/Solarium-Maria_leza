@@ -30,6 +30,7 @@
     gap:3vh;padding:6vw;text-align:center;background:var(--ok);color:#fff}
   #msg.show{display:flex}
   #msg.bad{background:var(--alerta)}
+  #msg.wait{background:var(--sol);color:var(--noche)}
   #msg .nombre{font-weight:500;font-size:clamp(28px,5vw,64px)}
   #msg .grande{font-weight:800;font-size:clamp(72px,22vw,260px);line-height:.9;letter-spacing:-.04em}
   #msg .pie{font-weight:500;font-size:clamp(22px,3.6vw,44px);max-width:22ch;line-height:1.2}
@@ -91,9 +92,10 @@
       document.getElementById('mGrande').textContent = '✕';
       document.getElementById('mPie').textContent = res.msg || 'No se pudo registrar';
     }
-    beep(ok);
+    m.classList.remove('wait');
+    if (!ok) beep(false);
     m.classList.add('show');
-    setTimeout(function () { m.classList.remove('show'); ocupado = false; reanudar(); }, SEGUNDOS_MENSAJE * 1000);
+    setTimeout(function () { m.classList.remove('show'); m.classList.remove('wait'); ocupado = false; }, SEGUNDOS_MENSAJE * 1000);
   }
 
   function llamar(id) {
@@ -117,13 +119,21 @@
     if (id === ultimo.id && ahora - ultimo.t < 5000) return;   // misma lectura repetida por la cámara
     ultimo = { id: id, t: ahora };
     ocupado = true;
-    pausar();
+    esperando();
     llamar(id);
   }
 
   // ---- Cámara ----
-  function pausar() { try { scanner && scanner.pause(true); } catch (e) {} }
-  function reanudar() { try { scanner && scanner.resume(); } catch (e) {} }
+  // Pantalla inmediata mientras el servidor responde
+  function esperando() {
+    var m = document.getElementById('msg');
+    m.classList.remove('bad'); m.classList.add('wait');
+    document.getElementById('mNombre').textContent = '';
+    document.getElementById('mGrande').textContent = '...';
+    document.getElementById('mPie').textContent = 'Comprobando tu bono';
+    beep(true);
+    m.classList.add('show');
+  }
 
   function arrancarCamara() {
     scanner = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
