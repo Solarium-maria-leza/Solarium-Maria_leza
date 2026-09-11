@@ -5,206 +5,231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Bono Solarium</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;800&display=swap" rel="stylesheet">
+<title>María Leza · Bonos</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{
-    --noche:#10233f; --sol:#ffb703; --arena:#fff4de; --ok:#2fb47c; --alerta:#ff5d5d;
+    --oro:#ECCD7B; --crema:#FCF6F2; --arena:#E5DFD7;
+    --grafito:#3A3A3A; --tinta:#121212; --alerta:#C2543F;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;background:var(--noche);color:var(--arena);
-    font-family:"Outfit",system-ui,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
-  #app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5vh;padding:4vh 4vw;text-align:center}
+  html,body{height:100%;background:var(--crema);color:var(--grafito);
+    font-family:"Assistant",system-ui,sans-serif;overflow:hidden;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 
-  h1{font-weight:800;font-size:clamp(28px,5vw,56px);letter-spacing:-.02em;color:var(--sol)}
-  .sub{font-weight:500;font-size:clamp(18px,2.6vw,30px);opacity:.85;max-width:28ch;line-height:1.3}
+  #reposo{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:4vh;padding:6vh 8vw;text-align:center;background:var(--crema)}
+  #reposo::after{content:"";position:absolute;inset:2.5vh 2.5vw;border:1px solid var(--arena);pointer-events:none}
+  #reposo img{width:min(46vw,420px);height:auto}
+  .filete{width:84px;height:1px;background:var(--oro)}
+  .claim{font-weight:300;font-size:clamp(18px,2.4vw,30px);letter-spacing:.18em;
+    text-transform:uppercase;color:#8A8178}
+  .instruccion{font-weight:300;font-size:clamp(24px,3.4vw,42px);line-height:1.35;max-width:20ch}
+  .instruccion b{font-weight:700;color:var(--tinta)}
 
-  #reader{width:min(78vw,62vh);aspect-ratio:1;border-radius:32px;overflow:hidden;
-    outline:6px solid var(--sol);outline-offset:8px;background:#000}
+  #msg{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
+    justify-content:center;gap:2vh;padding:6vw;text-align:center;background:var(--crema);z-index:20}
+  #msg.show{display:flex}
+  #msg .nombre{font-weight:300;font-size:clamp(30px,5vw,60px);color:var(--grafito)}
+  #msg .grande{font-weight:700;font-size:clamp(120px,26vw,300px);line-height:.85;
+    letter-spacing:-.04em;color:var(--tinta)}
+  #msg .sello{width:120px;height:3px;background:var(--oro);margin:1vh 0}
+  #msg .pie{font-weight:500;font-size:clamp(22px,3.2vw,40px);max-width:22ch;line-height:1.25;color:#6E665E}
+  #msg.bad .grande{color:var(--alerta);font-size:clamp(90px,16vw,200px)}
+  #msg.bad .pie{color:var(--alerta)}
+  #msg.wait .grande{color:var(--oro)}
+
+  #camara{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
+    justify-content:center;gap:3vh;background:var(--crema);padding:4vh;z-index:30}
+  #camara.show{display:flex}
+  #camara h2{font-weight:500;font-size:clamp(22px,3vw,34px)}
+  #reader{width:min(70vw,56vh);aspect-ratio:1;overflow:hidden;
+    outline:2px solid var(--oro);outline-offset:10px;background:#000}
   #reader video{width:100%!important;height:100%!important;object-fit:cover}
   #reader img{display:none}
+  #cerrarCam{margin-top:1vh;padding:14px 34px;border:1px solid var(--arena);background:#fff;
+    font-family:inherit;font-weight:500;font-size:18px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--grafito)}
 
-  /* mensaje a pantalla completa */
-  #msg{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
-    gap:3vh;padding:6vw;text-align:center;background:var(--ok);color:#fff}
-  #msg.show{display:flex}
-  #msg.bad{background:var(--alerta)}
-  #msg.wait{background:var(--sol);color:var(--noche)}
-  #msg .nombre{font-weight:500;font-size:clamp(28px,5vw,64px)}
-  #msg .grande{font-weight:800;font-size:clamp(72px,22vw,260px);line-height:.9;letter-spacing:-.04em}
-  #msg .pie{font-weight:500;font-size:clamp(22px,3.6vw,44px);max-width:22ch;line-height:1.2}
-
-  #estado{position:fixed;bottom:2vh;left:0;right:0;text-align:center;font-size:14px;opacity:.5}
+  #secreta{position:fixed;right:0;bottom:0;width:14vw;height:12vh;z-index:50}
+  #estado{position:fixed;bottom:1.4vh;left:0;right:0;text-align:center;
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#B6ADA3;z-index:40}
   @media (prefers-reduced-motion:no-preference){
-    #msg.show{animation:pop .25s ease-out}
-    @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+    #msg.show{animation:fundido .3s ease-out}
+    @keyframes fundido{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   }
 </style>
 </head>
 <body>
-<div id="app">
-  <h1>Acerca tu QR a la cámara</h1>
-  <div id="reader"></div>
-  <p class="sub">Se descontará una sesión de tu bono y verás cuántas te quedan.</p>
+
+<div id="reposo">
+  <img src="https://marialeza.com/wp-content/uploads/2023/10/Maria-Leza-Esteticistas-Logo-BK.png" alt="Maria Leza Esteticistas">
+  <div class="filete"></div>
+  <p class="claim">Centro de estetica &middot; Logrono</p>
+  <p class="instruccion">Presenta tu <b>codigo QR</b> en recepcion para validar tu sesion</p>
 </div>
 
 <div id="msg" aria-live="assertive">
   <div class="nombre" id="mNombre"></div>
   <div class="grande" id="mGrande"></div>
+  <div class="sello"></div>
   <div class="pie" id="mPie"></div>
 </div>
-<div id="estado">Cargando clientes...</div>
+
+<div id="camara">
+  <h2>Lector de respaldo</h2>
+  <div id="reader"></div>
+  <button id="cerrarCam">Cerrar</button>
+</div>
+
+<div id="secreta"></div>
+<div id="estado">Cargando...</div>
 
 <script>
-  // ---- Configuración ----
-  var SEGUNDOS_MENSAJE = 3;
-  // Solo si esta página se abre FUERA de Apps Script (p.ej. GitHub Pages): pega aquí la URL /exec del script.
+  var SEGUNDOS_MENSAJE = 5;
+  var SEGUNDOS_ANTIDOBLE = 30;
   var API_URL = 'https://script.google.com/macros/s/AKfycbw9QL0V0chhUoZUOjT4E1mTD-u2IFuPG2TwJBejLXiTkW94xli90T3CB7clWxN9HqByZQ/exec';
 
-  var ocupado = false;
-  var ultimo = { id: '', t: 0 };
-  var scanner = null;
-  var clientes = {};          // caché local: id -> {nombre, bono, usadas}
-  var ultimaPasada = {};      // id -> timestamp (anti doble pasada local)
-  var SEGUNDOS_ANTIDOBLE = 30;
+  var ocupado = false, ultimo = { id:'', t:0 }, clientes = {}, ultimaPasada = {};
+  var scanner = null, camaraActiva = false;
 
-  function beep(bueno) {
-    try {
-      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+  function beep(bueno){
+    try{
+      var ctx = new (window.AudioContext||window.webkitAudioContext)();
       var o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = bueno ? 880 : 220;
-      g.gain.value = 0.25; o.connect(g); g.connect(ctx.destination);
-      o.start(); o.stop(ctx.currentTime + (bueno ? 0.15 : 0.4));
-    } catch (e) {}
+      o.type='sine'; o.frequency.value = bueno?880:220; g.gain.value=.22;
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime + (bueno?.15:.4));
+    }catch(e){}
   }
 
-  // Carga/refresca la lista de clientes (al abrir y cada 60 s)
-  function cargarLista() {
-    if (!API_URL) return;
+  function cargarLista(){
+    if(!API_URL) return;
     fetch(API_URL + '?lista=1&t=' + Date.now())
-      .then(function (r) { return r.json(); })
-      .then(function (arr) {
-        var m = {};
-        arr.forEach(function (c) { m[c.id] = c; });
+      .then(function(r){ return r.json(); })
+      .then(function(arr){
+        var m = {}; arr.forEach(function(c){ m[c.id] = c; });
         clientes = m;
         document.getElementById('estado').textContent = 'Listo · ' + arr.length + ' clientes';
       })
-      .catch(function () { document.getElementById('estado').textContent = 'Sin conexion con la hoja. Reintentando...'; });
+      .catch(function(){ document.getElementById('estado').textContent = 'Sin conexion · reintentando'; });
   }
 
-  function pintar(res, temporizador) {
+  function pintar(res, conTemporizador){
     var m = document.getElementById('msg');
     var ok = res.ok && !res.repetido;
     m.classList.remove('wait');
     m.classList.toggle('bad', !ok);
-    document.getElementById('mNombre').textContent = res.nombre ? 'Hola, ' + res.nombre : '';
-    if (ok) {
+    document.getElementById('mNombre').textContent = res.nombre || '';
+    if(ok){
       document.getElementById('mGrande').textContent = res.restantes;
       document.getElementById('mPie').textContent = res.restantes === 1
-        ? 'sesión restante. ¡Renueva pronto!' : 'sesiones restantes';
-    } else if (res.repetido) {
+        ? 'sesion restante · renueva tu bono' : 'sesiones restantes';
+    } else if(res.repetido){
       document.getElementById('mGrande').textContent = res.restantes;
-      document.getElementById('mPie').textContent = 'Ya estaba registrada tu visita';
+      document.getElementById('mPie').textContent = 'Visita ya registrada';
     } else {
-      document.getElementById('mGrande').textContent = '✕';
+      document.getElementById('mGrande').textContent = '—';
       document.getElementById('mPie').textContent = res.msg || 'No se pudo registrar';
     }
     beep(ok);
     m.classList.add('show');
-    if (temporizador) {
-      setTimeout(function () { m.classList.remove('show'); ocupado = false; }, SEGUNDOS_MENSAJE * 1000);
+    if(conTemporizador){
+      setTimeout(function(){ m.classList.remove('show'); ocupado = false; }, SEGUNDOS_MENSAJE*1000);
     }
   }
 
-  function llamar(id, enSegundoPlano) {
-    var done = function (res) {
-      if (enSegundoPlano) {
-        // Ya mostramos el resultado local; corregimos si el servidor dice otra cosa
-        if (!res.ok || res.repetido) { pintar(res, false); }
-        if (clientes[id] && typeof res.restantes === 'number') {
-          clientes[id].usadas = (clientes[id].bono || 0) - res.restantes;
+  function llamar(id, enSegundoPlano){
+    var done = function(res){
+      if(enSegundoPlano){
+        if(!res.ok || res.repetido){ pintar(res, false); }
+        if(clientes[id] && typeof res.restantes === 'number'){
+          clientes[id].usadas = (clientes[id].bono||0) - res.restantes;
         }
-      } else {
-        pintar(res, true);
-      }
+      } else { pintar(res, true); }
     };
-    var fallo = function () { if (!enSegundoPlano) pintar({ ok: false, msg: 'Sin conexión. Inténtalo de nuevo' }, true); };
-    if (window.google && google.script && google.script.run) {
-      google.script.run.withSuccessHandler(done).withFailureHandler(fallo).registrar(id);
-    } else if (API_URL) {
-      // 'n' es un identificador unico de esta lectura: si la red repite la peticion, el servidor no la cuenta dos veces
-      var nonce = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-      fetch(API_URL + '?id=' + encodeURIComponent(id) + '&n=' + nonce, { cache: 'no-store' })
-        .then(function (r) { return r.json(); }).then(done).catch(fallo);
-    } else {
-      pintar({ ok: false, msg: 'Falta configurar API_URL' }, true);
-    }
+    var fallo = function(){ if(!enSegundoPlano) pintar({ok:false, msg:'Sin conexion. Intentalo de nuevo'}, true); };
+    var nonce = Date.now() + '-' + Math.random().toString(36).slice(2,8);
+    fetch(API_URL + '?id=' + encodeURIComponent(id) + '&n=' + nonce, {cache:'no-store'})
+      .then(function(r){ return r.json(); }).then(done).catch(fallo);
   }
 
-  function procesar(texto) {
-    var id = String(texto || '').trim().toUpperCase();
+  function procesar(texto){
+    var id = String(texto||'').trim().toUpperCase();
     var ahora = Date.now();
-    if (!id || ocupado) return;
-    if (id === ultimo.id && ahora - ultimo.t < 5000) return;   // misma lectura repetida por la cámara
-    ultimo = { id: id, t: ahora };
+    if(!id || ocupado) return;
+    if(id === ultimo.id && ahora - ultimo.t < 5000) return;
+    ultimo = { id:id, t:ahora };
     ocupado = true;
+    if(camaraActiva) cerrarCamara();
 
     var c = clientes[id];
-    if (c) {
-      // Respuesta INSTANTÁNEA desde la caché local
-      if (ultimaPasada[id] && ahora - ultimaPasada[id] < SEGUNDOS_ANTIDOBLE * 1000) {
-        pintar({ ok: true, repetido: true, nombre: c.nombre, restantes: c.bono - c.usadas }, true);
+    if(c){
+      if(ultimaPasada[id] && ahora - ultimaPasada[id] < SEGUNDOS_ANTIDOBLE*1000){
+        pintar({ok:true, repetido:true, nombre:c.nombre, restantes:c.bono - c.usadas}, true);
         return;
       }
       var restantes = c.bono - c.usadas;
-      if (restantes <= 0) {
-        pintar({ ok: false, nombre: c.nombre, msg: 'Sin sesiones. Pasa por recepción' }, true);
+      if(restantes <= 0){
+        pintar({ok:false, nombre:c.nombre, msg:'Sin sesiones · pasa por recepcion'}, true);
         return;
       }
       c.usadas += 1;
       ultimaPasada[id] = ahora;
-      pintar({ ok: true, nombre: c.nombre, restantes: restantes - 1 }, true);
-      llamar(id, true);                 // registra en la hoja en segundo plano
+      pintar({ok:true, nombre:c.nombre, restantes:restantes-1}, true);
+      llamar(id, true);
     } else {
-      // No está en caché (cliente nuevo): esperar al servidor
       var m = document.getElementById('msg');
       m.classList.remove('bad'); m.classList.add('wait');
       document.getElementById('mNombre').textContent = '';
-      document.getElementById('mGrande').textContent = '...';
-      document.getElementById('mPie').textContent = 'Comprobando tu bono';
-      beep(true);
-      m.classList.add('show');
+      document.getElementById('mGrande').textContent = '·';
+      document.getElementById('mPie').textContent = 'Comprobando...';
+      beep(true); m.classList.add('show');
       llamar(id, false);
       cargarLista();
     }
   }
 
-  // ---- Cámara ----
-  function arrancarCamara() {
-    scanner = new Html5Qrcode('reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
-    var lado = Math.min(window.innerWidth, window.innerHeight) * 0.7;
-    scanner.start({ facingMode: 'user' }, { fps: 10, qrbox: { width: lado * .8, height: lado * .8 } },
-      function (texto) { procesar(texto); },
-      function () {})
-      .catch(function () {
-        // Cámara trasera si la frontal no está disponible
-        scanner.start({ facingMode: 'environment' }, { fps: 10 }, function (t) { procesar(t); }, function () {})
-          .catch(function (err) {
-            document.getElementById('estado').textContent =
-              'La cámara no está disponible aquí. Usa la pistola lectora o abre la página en Safari a pantalla completa.';
-          });
-      });
-  }
-
-  // ---- Pistola lectora (Bluetooth/USB): teclea el ID y pulsa Enter ----
   var buffer = '';
-  document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Enter') { var v = buffer; buffer = ''; if (v) procesar(v); return; }
-    if (ev.key.length === 1) { buffer += ev.key; setTimeout(function () { buffer = ''; }, 800); }
+  document.addEventListener('keydown', function(ev){
+    if(ev.key === 'Enter'){ var v = buffer; buffer=''; if(v) procesar(v); return; }
+    if(ev.key.length === 1){ buffer += ev.key; setTimeout(function(){ buffer=''; }, 800); }
   });
 
-  document.addEventListener('DOMContentLoaded', function () { arrancarCamara(); cargarLista(); setInterval(cargarLista, 60000); });
+  function abrirCamara(){
+    if(camaraActiva) return;
+    camaraActiva = true;
+    document.getElementById('camara').classList.add('show');
+    scanner = new Html5Qrcode('reader', { formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE] });
+    var lado = Math.min(window.innerWidth, window.innerHeight) * .6;
+    scanner.start({facingMode:'user'}, {fps:10, qrbox:{width:lado*.8, height:lado*.8}},
+      function(t){ procesar(t); }, function(){})
+      .catch(function(){
+        scanner.start({facingMode:'environment'}, {fps:10}, function(t){ procesar(t); }, function(){})
+          .catch(function(){ document.getElementById('estado').textContent = 'Camara no disponible'; });
+      });
+  }
+  function cerrarCamara(){
+    if(!camaraActiva) return;
+    camaraActiva = false;
+    document.getElementById('camara').classList.remove('show');
+    try{ scanner && scanner.stop().then(function(){ scanner.clear(); }); }catch(e){}
+  }
+  var tempLargo = null;
+  var secreta = document.getElementById('secreta');
+  ['touchstart','mousedown'].forEach(function(ev){
+    secreta.addEventListener(ev, function(){ tempLargo = setTimeout(abrirCamara, 3000); });
+  });
+  ['touchend','touchcancel','mouseup','mouseleave'].forEach(function(ev){
+    secreta.addEventListener(ev, function(){ clearTimeout(tempLargo); });
+  });
+  document.getElementById('cerrarCam').addEventListener('click', cerrarCamara);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    cargarLista();
+    setInterval(cargarLista, 60000);
+  });
 </script>
 </body>
 </html>
