@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>María Leza · Bonos</title>
-<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{
@@ -21,40 +24,45 @@
   #reposo{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:4vh;padding:6vh 8vw;text-align:center;background:var(--crema)}
   #reposo::after{content:"";position:absolute;inset:2.5vh 2.5vw;border:1px solid var(--arena);pointer-events:none}
-  #reposo img{width:min(46vw,420px);height:auto}
+  .marca{display:flex;flex-direction:column;align-items:center;gap:.8vh}
+  .marca-nombre{font-weight:200;font-size:clamp(44px,7.5vw,104px);letter-spacing:.14em;
+    color:var(--tinta);line-height:1}
+  .marca-sub{font-weight:300;font-size:clamp(13px,1.7vw,22px);letter-spacing:.46em;
+    color:#8A8178;padding-left:.46em}
   .filete{width:84px;height:1px;background:var(--oro)}
-  .claim{font-weight:300;font-size:clamp(18px,2.4vw,30px);letter-spacing:.18em;
+  .claim{font-weight:300;font-size:clamp(16px,2.2vw,26px);letter-spacing:.2em;
     text-transform:uppercase;color:#8A8178}
-  .instruccion{font-weight:300;font-size:clamp(24px,3.4vw,42px);line-height:1.35;max-width:20ch}
+  .instruccion{font-weight:300;font-size:clamp(22px,3.2vw,40px);line-height:1.4;max-width:20ch}
   .instruccion b{font-weight:700;color:var(--tinta)}
 
   #msg{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
-    justify-content:center;gap:2vh;padding:6vw;text-align:center;background:var(--crema);z-index:20}
+    justify-content:center;gap:1.5vh;padding:6vw;text-align:center;background:var(--crema);z-index:20}
   #msg.show{display:flex}
-  #msg .nombre{font-weight:300;font-size:clamp(30px,5vw,60px);color:var(--grafito)}
-  #msg .grande{font-weight:700;font-size:clamp(120px,26vw,300px);line-height:.85;
+  #msg .nombre{font-weight:300;font-size:clamp(30px,5vw,62px);color:var(--grafito)}
+  #msg .grande{font-weight:700;font-size:clamp(120px,27vw,320px);line-height:.85;
     letter-spacing:-.04em;color:var(--tinta)}
   #msg .sello{width:120px;height:3px;background:var(--oro);margin:1vh 0}
   #msg .pie{font-weight:500;font-size:clamp(22px,3.2vw,40px);max-width:22ch;line-height:1.25;color:#6E665E}
-  #msg.bad .grande{color:var(--alerta);font-size:clamp(90px,16vw,200px)}
+  #msg.bad .grande{color:var(--alerta);font-size:clamp(80px,14vw,180px)}
   #msg.bad .pie{color:var(--alerta)}
   #msg.wait .grande{color:var(--oro)}
 
   #camara{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;
     justify-content:center;gap:3vh;background:var(--crema);padding:4vh;z-index:30}
   #camara.show{display:flex}
-  #camara h2{font-weight:500;font-size:clamp(22px,3vw,34px)}
+  #camara h2{font-weight:300;font-size:clamp(20px,2.6vw,30px);letter-spacing:.16em;
+    text-transform:uppercase;color:#8A8178}
   #reader{width:min(70vw,56vh);aspect-ratio:1;overflow:hidden;
     outline:2px solid var(--oro);outline-offset:10px;background:#000}
   #reader video{width:100%!important;height:100%!important;object-fit:cover}
   #reader img{display:none}
   #cerrarCam{margin-top:1vh;padding:14px 34px;border:1px solid var(--arena);background:#fff;
-    font-family:inherit;font-weight:500;font-size:18px;letter-spacing:.1em;
+    font-family:inherit;font-weight:500;font-size:17px;letter-spacing:.12em;
     text-transform:uppercase;color:var(--grafito)}
 
   #secreta{position:fixed;right:0;bottom:0;width:14vw;height:12vh;z-index:50}
   #estado{position:fixed;bottom:1.4vh;left:0;right:0;text-align:center;
-    font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#B6ADA3;z-index:40}
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#C3BAB0;z-index:40}
   @media (prefers-reduced-motion:no-preference){
     #msg.show{animation:fundido .3s ease-out}
     @keyframes fundido{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -64,10 +72,13 @@
 <body>
 
 <div id="reposo">
-  <img src="https://marialeza.com/wp-content/uploads/2023/10/Maria-Leza-Esteticistas-Logo-BK.png" alt="Maria Leza Esteticistas">
+  <div class="marca">
+    <span class="marca-nombre">MARÍA LEZA</span>
+    <span class="marca-sub">ESTETICISTAS</span>
+  </div>
   <div class="filete"></div>
-  <p class="claim">Centro de estetica &middot; Logrono</p>
-  <p class="instruccion">Presenta tu <b>codigo QR</b> en recepcion para validar tu sesion</p>
+  <p class="claim">Centro de estética · Logroño</p>
+  <p class="instruccion">Presenta tu <b>código QR</b> en recepción para validar tu sesión</p>
 </div>
 
 <div id="msg" aria-live="assertive">
@@ -87,6 +98,7 @@
 <div id="estado">Cargando...</div>
 
 <script>
+  var VERSION = 'v5';
   var SEGUNDOS_MENSAJE = 5;
   var SEGUNDOS_ANTIDOBLE = 30;
   var API_URL = 'https://script.google.com/macros/s/AKfycbw9QL0V0chhUoZUOjT4E1mTD-u2IFuPG2TwJBejLXiTkW94xli90T3CB7clWxN9HqByZQ/exec';
@@ -105,13 +117,12 @@
   }
 
   function cargarLista(){
-    if(!API_URL) return;
-    fetch(API_URL + '?lista=1&t=' + Date.now())
+    fetch(API_URL + '?lista=1&t=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(arr){
         var m = {}; arr.forEach(function(c){ m[c.id] = c; });
         clientes = m;
-        document.getElementById('estado').textContent = 'Listo · ' + arr.length + ' clientes';
+        document.getElementById('estado').textContent = VERSION + ' · ' + arr.length + ' clientes';
       })
       .catch(function(){ document.getElementById('estado').textContent = 'Sin conexion · reintentando'; });
   }
@@ -125,7 +136,7 @@
     if(ok){
       document.getElementById('mGrande').textContent = res.restantes;
       document.getElementById('mPie').textContent = res.restantes === 1
-        ? 'sesion restante · renueva tu bono' : 'sesiones restantes';
+        ? 'sesión restante · renueva tu bono' : 'sesiones restantes';
     } else if(res.repetido){
       document.getElementById('mGrande').textContent = res.restantes;
       document.getElementById('mPie').textContent = 'Visita ya registrada';
@@ -149,7 +160,7 @@
         }
       } else { pintar(res, true); }
     };
-    var fallo = function(){ if(!enSegundoPlano) pintar({ok:false, msg:'Sin conexion. Intentalo de nuevo'}, true); };
+    var fallo = function(){ if(!enSegundoPlano) pintar({ok:false, msg:'Sin conexión. Inténtalo de nuevo'}, true); };
     var nonce = Date.now() + '-' + Math.random().toString(36).slice(2,8);
     fetch(API_URL + '?id=' + encodeURIComponent(id) + '&n=' + nonce, {cache:'no-store'})
       .then(function(r){ return r.json(); }).then(done).catch(fallo);
@@ -172,7 +183,7 @@
       }
       var restantes = c.bono - c.usadas;
       if(restantes <= 0){
-        pintar({ok:false, nombre:c.nombre, msg:'Sin sesiones · pasa por recepcion'}, true);
+        pintar({ok:false, nombre:c.nombre, msg:'Sin sesiones · pasa por recepción'}, true);
         return;
       }
       c.usadas += 1;
@@ -207,7 +218,7 @@
       function(t){ procesar(t); }, function(){})
       .catch(function(){
         scanner.start({facingMode:'environment'}, {fps:10}, function(t){ procesar(t); }, function(){})
-          .catch(function(){ document.getElementById('estado').textContent = 'Camara no disponible'; });
+          .catch(function(){ document.getElementById('estado').textContent = 'Cámara no disponible'; });
       });
   }
   function cerrarCamara(){
@@ -226,10 +237,8 @@
   });
   document.getElementById('cerrarCam').addEventListener('click', cerrarCamara);
 
-  document.addEventListener('DOMContentLoaded', function(){
-    cargarLista();
-    setInterval(cargarLista, 60000);
-  });
+  cargarLista();
+  setInterval(cargarLista, 60000);
 </script>
 </body>
 </html>
