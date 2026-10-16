@@ -228,12 +228,12 @@
   }
   var tempLargo = null;
   var secreta = document.getElementById('secreta');
-  ['touchstart','mousedown'].forEach(function(ev){
-    secreta.addEventListener(ev, function(){ tempLargo = setTimeout(abrirCamara, 3000); });
-  });
-  ['touchend','touchcancel','mouseup','mouseleave'].forEach(function(ev){
+  secreta.style.cssText += ';-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none';
+  secreta.addEventListener('pointerdown', function(e){ e.preventDefault(); clearTimeout(tempLargo); tempLargo = setTimeout(abrirCamara, 3000); });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
     secreta.addEventListener(ev, function(){ clearTimeout(tempLargo); });
   });
+  secreta.addEventListener('contextmenu', function(e){ e.preventDefault(); });
   document.getElementById('cerrarCam').addEventListener('click', cerrarCamara);
 
   cargarLista();
