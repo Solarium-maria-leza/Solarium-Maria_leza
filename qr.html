@@ -33,6 +33,13 @@
   .btn:active{transform:scale(.98)}
   .sub{font-size:13px;color:#8d847c;text-align:center;line-height:1.4}
   .error{padding:40px 10px;font-size:17px;color:var(--grafito)}
+  .datos{margin:18px auto 0;padding:14px 12px;border-radius:14px;background:var(--crema);max-width:300px}
+  .datos .lbl{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#9a8f86}
+  .datos .rest{font-size:26px;font-weight:300;margin-top:2px}
+  .datos .rest b{font-weight:600}
+  .datos .fechas{margin-top:8px;font-size:13px;color:var(--grafito);line-height:1.5}
+  .datos.alerta{background:#FBEAEA}
+  .datos.alerta .rest{color:#B23B3B;font-size:20px}
 </style>
 </head>
 <body>
@@ -43,6 +50,7 @@
       <div class="eyebrow">Tu bono</div>
       <div class="serv" id="serv"></div>
       <div class="nombre" id="nombre"></div>
+      <div class="datos" id="datos"><div class="lbl">Sesiones</div><div class="rest" id="rest">Cargando…</div><div class="fechas" id="fechas"></div></div>
       <div class="qrbox"><div id="qr"></div></div>
       <div class="id" id="idtxt"></div>
       <p class="hint">Enséñalo en recepción al llegar.<br>Pásalo por el lector y listo.</p>
@@ -73,6 +81,24 @@
     text: id, width: 440, height: 440,
     colorDark: '#2C2C2C', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.H
   });
+
+  // Datos en vivo del bono (sesiones restantes, compra y caducidad)
+  var API_URL = 'https://script.google.com/macros/s/AKfycbx380QtvCnx_XcnyUAm-iajIvkTbh5E4HlEz2qMxPelLIJlX-jS8_SKR_R-NTWMBPnNfA/exec';
+  fetch(API_URL + '?bono=' + encodeURIComponent(id), { cache: 'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var caja = document.getElementById('datos'), rest = document.getElementById('rest'), fechas = document.getElementById('fechas');
+      if (!d || !d.ok) { caja.style.display = 'none'; return; }
+      if (d.caducado) { caja.className = 'datos alerta'; rest.textContent = 'Bono caducado · pásate por recepción'; }
+      else if (d.restantes <= 0) { caja.className = 'datos alerta'; rest.textContent = 'Sin sesiones · renuévalo en recepción'; }
+      else { rest.innerHTML = 'Te quedan <b>' + d.restantes + '</b> de ' + d.sesiones; }
+      var f = [];
+      if (d.compra) f.push('Comprado el ' + d.compra);
+      if (d.caducidad) f.push('Caduca el ' + d.caducidad);
+      fechas.textContent = f.join(' · ');
+      if (!nombre && d.nombre) document.getElementById('nombre').textContent = d.nombre;
+    })
+    .catch(function(){ document.getElementById('datos').style.display = 'none'; });
 
   function qrCanvas(){ return document.querySelector('#qr canvas'); }
 
