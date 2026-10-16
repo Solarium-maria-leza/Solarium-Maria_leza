@@ -212,6 +212,9 @@
     if(camaraActiva) return;
     camaraActiva = true;
     document.getElementById('camara').classList.add('show');
+    // Al abrir la cámara se limpia el mensaje anterior para que el siguiente QR no se ignore
+    document.getElementById('msg').classList.remove('show');
+    ocupado = false; ultimo = { id:'', t:0 };
     cierre.then(function(){
       if(!camaraActiva) return;
       scanner = new Html5Qrcode('reader', { formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE] });
