@@ -207,24 +207,35 @@
     if(ev.key.length === 1){ buffer += ev.key; setTimeout(function(){ buffer=''; }, 800); }
   });
 
+  var cierre = Promise.resolve();
   function abrirCamara(){
     if(camaraActiva) return;
     camaraActiva = true;
     document.getElementById('camara').classList.add('show');
-    scanner = new Html5Qrcode('reader', { formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE] });
-    var lado = Math.min(window.innerWidth, window.innerHeight) * .6;
-    scanner.start({facingMode:'user'}, {fps:10, qrbox:{width:lado*.8, height:lado*.8}},
-      function(t){ procesar(t); }, function(){})
-      .catch(function(){
-        scanner.start({facingMode:'environment'}, {fps:10}, function(t){ procesar(t); }, function(){})
-          .catch(function(){ document.getElementById('estado').textContent = 'Cámara no disponible'; });
-      });
+    cierre.then(function(){
+      if(!camaraActiva) return;
+      scanner = new Html5Qrcode('reader', { formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE] });
+      var lado = Math.min(window.innerWidth, window.innerHeight) * .6;
+      var leido = function(t){ if(camaraActiva) procesar(t); };
+      scanner.start({facingMode:'user'}, {fps:10, qrbox:{width:lado*.8, height:lado*.8}}, leido, function(){})
+        .catch(function(){
+          scanner.start({facingMode:'environment'}, {fps:10}, leido, function(){})
+            .catch(function(){ document.getElementById('estado').textContent = 'Cámara no disponible'; });
+        });
+    });
   }
   function cerrarCamara(){
     if(!camaraActiva) return;
     camaraActiva = false;
     document.getElementById('camara').classList.remove('show');
-    try{ scanner && scanner.stop().then(function(){ scanner.clear(); }); }catch(e){}
+    var s = scanner; scanner = null;
+    cierre = new Promise(function(res){
+      setTimeout(function(){
+        if(!s) return res();
+        Promise.resolve().then(function(){ return s.stop(); }).catch(function(){})
+          .then(function(){ try{ s.clear(); }catch(e){} res(); });
+      }, 0);
+    });
   }
   var tempLargo = null;
   var secreta = document.getElementById('secreta');
