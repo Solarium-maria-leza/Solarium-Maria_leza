@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu bono · María Leza</title>
+<meta property="og:title" content="Tu bono de María Leza">
+<meta property="og:description" content="Abre el enlace y enseña tu código QR en recepción.">
+<meta property="og:image" content="https://marialeza.com/wp-content/uploads/2024/01/cropped-maria-leza-favicon-192x192.png">
+<link rel="icon" href="https://marialeza.com/wp-content/uploads/2024/01/cropped-maria-leza-favicon-192x192.png">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{--oro:#ECCD7B;--crema:#FCF6F2;--arena:#E5DFD7;--grafito:#3A3A3A;--tinta:#2C2C2C}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--crema);color:var(--tinta);font-family:'Assistant',system-ui,sans-serif}
+  body{display:flex;justify-content:center;padding:24px 16px 40px}
+  .wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:20px}
+  .card{width:100%;background:#fff;border-radius:22px;padding:30px 26px 26px;text-align:center;
+        box-shadow:0 18px 40px -18px rgba(58,58,58,.25);border:1px solid var(--arena);position:relative;overflow:hidden}
+  .card:before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:var(--oro)}
+  .logo{height:30px;margin:6px auto 22px;display:block}
+  .eyebrow{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:#9a8f86;font-weight:400}
+  .serv{font-size:30px;font-weight:300;letter-spacing:.02em;margin:6px 0 4px;line-height:1.15}
+  .nombre{font-size:17px;font-weight:400;color:var(--grafito)}
+  .qrbox{margin:22px auto 12px;padding:16px;border-radius:16px;background:#fff;border:2px solid var(--oro);
+         display:inline-block;line-height:0}
+  #qr canvas,#qr img{width:220px!important;height:220px!important;image-rendering:pixelated}
+  .id{font-size:11px;letter-spacing:.2em;color:#b0a79f;text-transform:uppercase}
+  .hint{margin-top:18px;font-size:15px;color:var(--grafito);line-height:1.45}
+  .btn{width:100%;border:0;border-radius:999px;padding:16px 20px;font:600 16px 'Assistant',sans-serif;
+       background:var(--tinta);color:#fff;cursor:pointer;letter-spacing:.03em}
+  .btn:active{transform:scale(.98)}
+  .sub{font-size:13px;color:#8d847c;text-align:center;line-height:1.4}
+  .error{padding:40px 10px;font-size:17px;color:var(--grafito)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="card">
+    <img class="logo" src="https://marialeza.com/wp-content/uploads/2023/10/Maria-Leza-Esteticistas-Logo-BK.png" alt="María Leza">
+    <div id="contenido">
+      <div class="eyebrow">Tu bono</div>
+      <div class="serv" id="serv"></div>
+      <div class="nombre" id="nombre"></div>
+      <div class="qrbox"><div id="qr"></div></div>
+      <div class="id" id="idtxt"></div>
+      <p class="hint">Enséñalo en recepción al llegar.<br>Pásalo por el lector y listo.</p>
+    </div>
+  </div>
+  <button class="btn" id="guardar">Guardar en mi móvil</button>
+  <p class="sub">Guárdalo en tus fotos para tenerlo siempre a mano,<br>o vuelve a abrir este enlace cuando vengas.</p>
+</div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  var id = (p.get('b') || '').trim();
+  var nombre = (p.get('n') || '').trim();
+  var serv = (p.get('s') || '').trim();
+
+  if (!id) {
+    document.getElementById('contenido').innerHTML = '<p class="error">Este enlace no es válido.<br>Pide tu bono en recepción.</p>';
+    document.getElementById('guardar').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('serv').textContent = serv || 'Bono';
+  document.getElementById('nombre').textContent = nombre;
+  document.getElementById('idtxt').textContent = 'Código ' + id;
+
+  new QRCode(document.getElementById('qr'), {
+    text: id, width: 440, height: 440,
+    colorDark: '#2C2C2C', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.H
+  });
+
+  function qrCanvas(){ return document.querySelector('#qr canvas'); }
+
+  // Imagen PNG de la tarjeta (1080x1350) para guardar o compartir
+  function generarPNG(cb){
+    var W = 1080, H = 1350, c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    var x = c.getContext('2d');
+    x.fillStyle = '#FCF6F2'; x.fillRect(0, 0, W, H);
+    // tarjeta
+    var cx = 70, cy = 70, cw = W - 140, ch = H - 140, r = 48;
+    x.save();
+    x.shadowColor = 'rgba(58,58,58,.18)'; x.shadowBlur = 50; x.shadowOffsetY = 20;
+    x.beginPath();
+    x.moveTo(cx + r, cy); x.arcTo(cx + cw, cy, cx + cw, cy + ch, r); x.arcTo(cx + cw, cy + ch, cx, cy + ch, r);
+    x.arcTo(cx, cy + ch, cx, cy, r); x.arcTo(cx, cy, cx + cw, cy, r); x.closePath();
+    x.fillStyle = '#FFFFFF'; x.fill();
+    x.restore();
+    x.save(); x.clip(); x.fillStyle = '#ECCD7B'; x.fillRect(cx, cy, cw, 14); x.restore();
+    x.textAlign = 'center'; x.fillStyle = '#2C2C2C';
+    // marca
+    x.font = '300 64px Assistant, sans-serif';
+    if (x.letterSpacing !== undefined) x.letterSpacing = '14px';
+    x.fillText('MARÍA LEZA', W / 2, 205);
+    x.font = '400 26px Assistant, sans-serif';
+    if (x.letterSpacing !== undefined) x.letterSpacing = '10px';
+    x.fillStyle = '#9a8f86'; x.fillText('ESTETICISTAS', W / 2, 250);
+    // servicio y nombre
+    x.font = '400 26px Assistant, sans-serif'; x.fillText('TU BONO', W / 2, 345);
+    if (x.letterSpacing !== undefined) x.letterSpacing = '0px';
+    x.fillStyle = '#2C2C2C'; x.font = '300 68px Assistant, sans-serif';
+    x.fillText(serv || 'Bono', W / 2, 425);
+    x.fillStyle = '#3A3A3A'; x.font = '400 40px Assistant, sans-serif';
+    x.fillText(nombre, W / 2, 485);
+    // QR con marco dorado
+    var q = 500, qx = (W - q) / 2, qy = 575;
+    x.strokeStyle = '#ECCD7B'; x.lineWidth = 6;
+    x.beginPath(); x.roundRect ? x.roundRect(qx - 34, qy - 34, q + 68, q + 68, 34) : x.rect(qx - 34, qy - 34, q + 68, q + 68); x.stroke();
+    x.imageSmoothingEnabled = false;
+    var src = qrCanvas();
+    if (src) x.drawImage(src, qx, qy, q, q);
+    x.fillStyle = '#b0a79f'; x.font = '400 26px Assistant, sans-serif';
+    if (x.letterSpacing !== undefined) x.letterSpacing = '6px';
+    x.fillText(('CÓDIGO ' + id).toUpperCase(), W / 2, qy + q + 90);
+    if (x.letterSpacing !== undefined) x.letterSpacing = '0px';
+    x.fillStyle = '#3A3A3A'; x.font = '400 34px Assistant, sans-serif';
+    x.fillText('Enséñalo en recepción al llegar', W / 2, qy + q + 150);
+    c.toBlob(cb, 'image/png');
+  }
+
+  document.getElementById('guardar').addEventListener('click', function(){
+    generarPNG(function(blob){
+      var nombreFichero = 'Bono-MariaLeza-' + (serv || 'bono').replace(/[^A-Za-z0-9]+/g, '-') + '.png';
+      var file = new File([blob], nombreFichero, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Mi bono María Leza' }).catch(function(){});
+      } else {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = nombreFichero;
+        document.body.appendChild(a); a.click(); a.remove();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
