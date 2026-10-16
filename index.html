@@ -240,13 +240,26 @@
       }, 0);
     });
   }
+  // Lector de respaldo: mantener pulsada la esquina inferior derecha 3 segundos
   var tempLargo = null;
   var secreta = document.getElementById('secreta');
-  secreta.style.cssText += ';-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none';
-  secreta.addEventListener('pointerdown', function(e){ e.preventDefault(); clearTimeout(tempLargo); tempLargo = setTimeout(abrirCamara, 3000); });
-  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
-    secreta.addEventListener(ev, function(){ clearTimeout(tempLargo); });
-  });
+  secreta.style.cssText += ';width:max(110px,20vw);height:max(110px,16vh);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 16px 14px 0';
+  secreta.innerHTML = '<span id="secretaIcono" style="font-size:24px;opacity:.2;transition:opacity .2s,transform 3s linear;pointer-events:none">📷</span>';
+  var icono = document.getElementById('secretaIcono');
+  function resetIcono(){ icono.style.transition = 'opacity .2s'; icono.style.opacity = '.2'; icono.style.transform = 'scale(1)'; }
+  function empezarPulsacion(e){
+    if (e.cancelable) e.preventDefault();
+    if (tempLargo) return;
+    icono.style.transition = 'opacity .2s,transform 3s linear'; icono.style.opacity = '.9'; icono.style.transform = 'scale(1.8)';
+    tempLargo = setTimeout(function(){ tempLargo = null; resetIcono(); abrirCamara(); }, 3000);
+  }
+  function soltarPulsacion(){ if (tempLargo) { clearTimeout(tempLargo); tempLargo = null; } resetIcono(); }
+  secreta.addEventListener('touchstart', empezarPulsacion, { passive: false });
+  secreta.addEventListener('touchend', soltarPulsacion);
+  secreta.addEventListener('touchcancel', soltarPulsacion);
+  secreta.addEventListener('mousedown', empezarPulsacion);
+  secreta.addEventListener('mouseup', soltarPulsacion);
+  secreta.addEventListener('mouseleave', soltarPulsacion);
   secreta.addEventListener('contextmenu', function(e){ e.preventDefault(); });
   document.getElementById('cerrarCam').addEventListener('click', cerrarCamara);
 
