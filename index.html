@@ -41,6 +41,10 @@
     letter-spacing:-.04em;color:var(--tinta)}
   #msg .sello{width:120px;height:3px;background:var(--oro);margin:1vh 0}
   #msg .pie{font-weight:500;font-size:clamp(22px,3.2vw,40px);max-width:22ch;line-height:1.25;color:#6E665E}
+  #msg .det{margin-top:2.2vh;font-weight:400;font-size:clamp(17px,2.2vw,28px);color:#8d847c;line-height:1.5;min-height:1.5em}
+  #msg .det b{color:var(--grafito);font-weight:600}
+  #msg .aviso{display:inline-block;margin-top:1.2vh;padding:.35em 1em;border-radius:99px;background:#FBEFD6;color:#9a6b00;font-weight:600}
+  #msg .aviso.rojo{background:#fdeceb;color:var(--alerta)}
   #msg.bad .grande{color:var(--alerta);font-size:clamp(80px,14vw,180px)}
   #msg.bad .pie{color:var(--alerta)}
   #msg.wait .grande{color:var(--oro)}
@@ -84,6 +88,7 @@
   <div class="grande" id="mGrande"></div>
   <div class="sello"></div>
   <div class="pie" id="mPie"></div>
+  <div class="det" id="mDet"></div>
 </div>
 
 <div id="camara">
@@ -96,8 +101,8 @@
 <div id="estado">Cargando…</div>
 
 <script>
-  var VERSION = 'v6';
-  var SEGUNDOS_MENSAJE = 5;
+  var VERSION = 'v7';
+  var SEGUNDOS_MENSAJE = 7;
   var SEGUNDOS_ANTIDOBLE = 30;
   var API_URL = 'https://script.google.com/macros/s/AKfycbx380QtvCnx_XcnyUAm-iajIvkTbh5E4HlEz2qMxPelLIJlX-jS8_SKR_R-NTWMBPnNfA/exec';
 
@@ -125,12 +130,38 @@
       .catch(function(){ document.getElementById('estado').textContent = 'Sin conexión · reintentando'; });
   }
 
+  var infoCache = {};
+  function pintarDetalle(id, restantes){
+    var det = document.getElementById('mDet');
+    var c = clientes[id] || {};
+    var html = function(info){
+      var partes = [];
+      var total = (info && info.sesiones) || c.bono;
+      if(typeof restantes === 'number' && total) partes.push('Te quedan <b>' + restantes + '</b> de ' + total);
+      if(info && info.compra) partes.push('Comprado el <b>' + info.compra + '</b>');
+      if(info && info.caducidad) partes.push('Caduca el <b>' + info.caducidad + '</b>');
+      var out = partes.join(' · ');
+      if(info && info.caducado) out += '<br><span class="aviso rojo">Bono caducado · pasa por recepción</span>';
+      else if(typeof restantes === 'number' && restantes <= 0) out += '<br><span class="aviso rojo">Bono agotado · pregunta por la renovación</span>';
+      else if(typeof restantes === 'number' && restantes <= 2) out += '<br><span class="aviso">Te quedan pocas · pregunta por la renovación</span>';
+      det.innerHTML = out;
+    };
+    html(infoCache[id]);
+    if(!id) return;
+    fetch(API_URL + '?bono=' + encodeURIComponent(id) + '&t=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(info){ if(info && info.ok !== false){ infoCache[id] = info; if(document.getElementById('msg').dataset.id === id) html(info); } })
+      .catch(function(){});
+  }
+
   function pintar(res, conTemporizador){
     var m = document.getElementById('msg');
     var ok = res.ok && !res.repetido;
     m.classList.remove('wait');
     m.classList.toggle('bad', !ok);
     document.getElementById('mNombre').textContent = res.nombre || '';
+    m.dataset.id = res.id || '';
+    document.getElementById('mDet').innerHTML = '';
     var srv = res.servicio ? ' de ' + res.servicio : '';
     if(ok){
       document.getElementById('mGrande').textContent = res.restantes;
@@ -143,6 +174,7 @@
       document.getElementById('mGrande').textContent = '—';
       document.getElementById('mPie').textContent = res.msg || 'No se pudo registrar';
     }
+    if(res.id && (ok || res.repetido || res.nombre)) pintarDetalle(res.id, typeof res.restantes === 'number' ? res.restantes : undefined);
     beep(ok);
     m.classList.add('show');
     if(conTemporizador){
@@ -153,11 +185,11 @@
   function llamar(id, enSegundoPlano){
     var done = function(res){
       if(enSegundoPlano){
-        if(!res.ok || res.repetido){ pintar(res, false); }
+        if(!res.ok || res.repetido){ res.id = id; pintar(res, false); }
         if(clientes[id] && typeof res.restantes === 'number'){
           clientes[id].usadas = (clientes[id].bono||0) - res.restantes;
         }
-      } else { pintar(res, true); }
+      } else { res.id = id; pintar(res, true); }
     };
     var fallo = function(){ if(!enSegundoPlano) pintar({ok:false, msg:'Sin conexión. Inténtalo de nuevo'}, true); };
     var nonce = Date.now() + '-' + Math.random().toString(36).slice(2,8);
@@ -177,17 +209,17 @@
     var c = clientes[id];
     if(c){
       if(ultimaPasada[id] && ahora - ultimaPasada[id] < SEGUNDOS_ANTIDOBLE*1000){
-        pintar({ok:true, repetido:true, nombre:c.nombre, servicio:c.servicio, restantes:c.bono - c.usadas}, true);
+        pintar({id:id, ok:true, repetido:true, nombre:c.nombre, servicio:c.servicio, restantes:c.bono - c.usadas}, true);
         return;
       }
       var restantes = c.bono - c.usadas;
       if(restantes <= 0){
-        pintar({ok:false, nombre:c.nombre, servicio:c.servicio, msg:'Sin sesiones · pasa por recepción'}, true);
+        pintar({id:id, ok:false, nombre:c.nombre, servicio:c.servicio, msg:'Sin sesiones · pasa por recepción', restantes:0}, true);
         return;
       }
       c.usadas += 1;
       ultimaPasada[id] = ahora;
-      pintar({ok:true, nombre:c.nombre, servicio:c.servicio, restantes:restantes-1}, true);
+      pintar({id:id, ok:true, nombre:c.nombre, servicio:c.servicio, restantes:restantes-1}, true);
       llamar(id, true);
     } else {
       var m = document.getElementById('msg');
